@@ -4,20 +4,20 @@
 #include <Arduino.h>
 
 class Motor {
-  
+
   private:
     byte IN1;
     byte IN2;
     byte ENA;
     int defaultSpeed = 255;
-    
-   public:
+
+  public:
     Motor();
     Motor(byte IN1, byte IN2, byte ENA);
-    
+
     void setMotor(byte IN1, byte IN2, byte ENA);
     void init();
-    
+
     void up();
     void down();
     void idle();

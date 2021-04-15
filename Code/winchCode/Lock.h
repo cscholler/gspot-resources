@@ -5,19 +5,19 @@
 #include "Button.h"
 
 class Lock {
-  
+
   private:
     Button button1;
     Button button2;
     bool locked; // true is locked, false is unlocked
-    
-   public:
+
+  public:
     Lock();
     Lock(Button first_button, Button second_button);
-    
+
     void setLock(Button first_button, Button second_button);
     void update();
-    
+
     bool isLocked();
 };
 
