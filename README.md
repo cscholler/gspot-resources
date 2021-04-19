@@ -9,3 +9,5 @@ Guide rails are 8020 10 series, [Part No. 1010](https://8020.net/1010.html)
 Winch cable is Home Depot [1/16th Galvanized Steel Wire Rope](https://www.homedepot.com/p/Everbilt-1-16-in-x-250-ft-Galvanized-Vinyl-Coated-Steel-Wire-Rope-806370/203958870)
 
 Winch drum is comprised of three laser cut 1/4in acrylic circles, two angled 3D printed PLA pieces held together with three brass binding screws, McMaster [93813A342](https://www.mcmaster.com/93813A342/) - If these come loose use a bit of locktight
+
+[Limit switches](https://www.amazon.com/dp/B07ZVJD1GC?psc=1&ref=ppx_yo2_dt_b_product_details) are held on with 3D printed mounts and 10/32 socket head bolts with T-nuts.
