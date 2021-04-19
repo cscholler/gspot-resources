@@ -21,7 +21,7 @@ void Actuator::setActuator(Button maxSwitch, Button minSwitch, Motor actuatorMot
   this->state = WAIT;
 }
 
-int Actuator::getState() {
+uint8_t Actuator::getState() {
   return state;
 }
 
@@ -29,52 +29,48 @@ void Actuator::setState(uint8_t newState) {
   this->state = newState;
 }
 
-int Actuator::calibrate(uint8_t calibrationSwitchEnum) {
+uint8_t Actuator::calibrate(uint8_t calibrationSwitchEnum) {
   state = CALIBRATE;
   Button calibrationSwitch = (calibrationSwitchEnum == MIN) ? minSwitch : maxSwitch;
   switch (state) {
     case CALIBRATE:
       if (calibrationSwitch.isPressed()) {
-        motor.up();
+        calibrationSwitchEnum == MIN ? motor.up() : motor.down();
         break;
       }
       else state = WAIT;
 
     case WAIT:
-      motor.hold();
+      motor.moveAtSpeed(1);
       if (calibrationSwitch.isPressed()) state = CALIBRATE;
-
-      break;
-  }
-}
-
-int Actuator::moveToMax() {
-  state = MOVE;
-  switch (state) {
-    case MOVE:
-      if (!maxSwitch.isPressed()) {
-        motor.up();
-        break;
-      }
-      else state = HOLD;
-
-    case HOLD:
-      if (maxSwitch.isPressed()) {
-        motor.hold();
-        break;
-      }
-      else state = ADJUST;
-
-    case ADJUST:
-      motor.up();
-      if (maxSwitch.isPressed()) state = HOLD;
 
       break;
   }
   return state;
 }
 
-int Actuator::moveToMin() {
+uint8_t Actuator::moveToMax() {
+  state = MOVE;
+  switch (state) {
+    case MOVE:
+      if (!maxSwitch.isPressed()) {
+        Serial.println("State: MOVE");
+        motor.up();
+        break;
+      }
+      else {
+        state = WAIT;
+      }
+
+    case WAIT:
+    Serial.println("State: WAIT");
+      motor.moveAtSpeed(1);
+      break;
+  }
+  return state;
+}
+
+uint8_t Actuator::moveToMin() {
   state = MOVE;
   switch (state) {
     case MOVE:
@@ -82,12 +78,17 @@ int Actuator::moveToMin() {
         motor.down();
         break;
       }
-      else state = HOLD;
+      else {
+        state = WAIT;
+      }
 
-    case HOLD:
-      motor.hold();
-
+    case WAIT:
+      motor.moveAtSpeed(-1);
       break;
   }
   return state;
+}
+
+void Actuator::hold() {
+  motor.hold();
 }

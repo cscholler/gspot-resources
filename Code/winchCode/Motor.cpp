@@ -1,5 +1,7 @@
 #include "Motor.h"
 
+#define defaultSpeed 255
+
 Motor::Motor() {}
 
 Motor::Motor(byte IN1, byte IN2, byte ENA) {
@@ -45,7 +47,7 @@ void Motor::hold() {
 }
 
 void Motor::moveAtSpeed(int moveSpeed) {
-  if (moveSpeed > 0) {
+  if (moveSpeed >= 0) {
     digitalWrite(IN1, HIGH);
     digitalWrite(IN2, LOW);
     analogWrite(ENA, moveSpeed);

@@ -21,12 +21,13 @@ class Actuator {
 
     void setActuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor, Lock lock);
 
-    int getState();
+    uint8_t getState();
     void setState(uint8_t newState);
 
-    int calibrate(uint8_t calibrationSwitch);
-    int moveToMax();
-    int moveToMin();
+    uint8_t calibrate(uint8_t calibrationSwitch);
+    uint8_t moveToMax();
+    uint8_t moveToMin();
+    void hold();
 };
 
 #endif

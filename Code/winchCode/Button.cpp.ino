@@ -39,5 +39,6 @@ byte Button::getState() {
 }
 
 bool Button::isPressed() {
-  return (normallyClosed ? getState() == LOW : getState() == HIGH);
+//  return (normallyClosed ? getState() == HIGH : getState() == LOW);
+    return (normallyClosed ? digitalRead(pin) == HIGH : digitalRead(pin) == LOW);
 }
