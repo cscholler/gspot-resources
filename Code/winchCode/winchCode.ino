@@ -37,6 +37,7 @@ enum Switch_enum {MIN, MAX};
 #define NORMALLY_CLOSED true
 #define NORMALLY_OPEN false
 
+// Create objects to be used later
 Motor wh_motor(H_IN1, H_IN2, WH_ENA);
 Motor dh_motor(H_IN1, H_IN2, DH_ENA);
 Motor wf_motor(F_IN1, F_IN2, WF_ENA);
@@ -78,9 +79,12 @@ void loop() {
   //    dh_motor.moveAtSpeed(1);
   //    wf_motor.moveAtSpeed(1);
   //    df_motor.moveAtSpeed(1);
+  // If only the 'up button' is pressed and the 'lock' is not engaged then begin actions to move upwards
   if (upButton.isPressed() && !dnButton.isPressed() && !lock.isLocked()) {
     Serial.println("up");
+    // If the bed is currently resting on the booth then run calibration before lifting
     if (atBottom) {
+      // To calibrate lift corner until it's just above the booth then wait until all corners have done the same
       Serial.println("At bottom");
       int actuatorCounter = 0;
       if (wh_actuator.calibrate(MIN) == WAIT) actuatorCounter++;
@@ -88,11 +92,14 @@ void loop() {
       if (wf_actuator.calibrate(MIN) == WAIT) actuatorCounter++;
       if (df_actuator.calibrate(MIN) == WAIT) actuatorCounter++;
 
+      // Once calibration is complete and all corners are just above resting on the booth set 'atBottom' to false and continue
       if (actuatorCounter >= 4) {
         Serial.println("Calibration complete");
         atBottom = false;
       }
-    } else if (!atTop){
+      // If the bed is not at the top of its travel distance then pull each corner upwards until they get there
+    } else if (!atTop) {
+      // Lift each corner until it's reached the upper limit switch and wait until all corners have done the same
       Serial.println("Moving up");
       int actuatorCounter = 0;
       if (wh_actuator.moveToMax() == WAIT) actuatorCounter++;
@@ -100,10 +107,12 @@ void loop() {
       if (wf_actuator.moveToMax() == WAIT) actuatorCounter++;
       if (df_actuator.moveToMax() == WAIT) actuatorCounter++;
 
+      // Check that all corners have reached their upper limit switch, if they have then set 'atTop' to true
       if (actuatorCounter >= 4) {
         Serial.println("Reached top");
         atTop = true;
       }
+      // If the bed is pressing all of the upper limit switches then set all motors to hold at top
     } else if (atTop) {
       Serial.println("At top");
       wh_actuator.hold();
@@ -112,14 +121,19 @@ void loop() {
       df_actuator.hold();
     }
 
+    // If any of the upper limit switches become unpressed then change 'atTop' back to false
     if (!wh_button_max.isPressed() || !dh_button_max.isPressed() || !wf_button_max.isPressed() || !df_button_max.isPressed()) {
-      atTop = false; 
+      atTop = false;
     }
 
     goingUp = true;
+
+    // If only the 'down button' is pressed and the 'lock' is not engaged then begin actions to move downwards
   } else if (!upButton.isPressed() && dnButton.isPressed() && !lock.isLocked()) {
     Serial.println("down");
+    // If the bed is not currently resting on the booth then move all corners down until it is
     if (!atBottom) {
+      // Move all corners down until they are pressed the lower limit switch then wait until all corners have done the same
       Serial.println("Not at bottom");
       int actuatorCounter = 0;
       if (wh_actuator.moveToMin() == WAIT) actuatorCounter++;
@@ -127,10 +141,20 @@ void loop() {
       if (wf_actuator.moveToMin() == WAIT) actuatorCounter++;
       if (df_actuator.moveToMin() == WAIT) actuatorCounter++;
 
+      // If all lower limit switches are pressed then set 'atBottom' to true and drive all motors for 0.5 sec to release tention
       if (actuatorCounter >= 4 ) {
         Serial.print("Reached bottom");
         atBottom = true;
+
+        wh_motor.down();
+        dh_motor.down();
+        wf_motor.down();
+        df_motor.down();
+
+        delay(500);
+
       }
+      // If bed is resting on the booth then set all motors to hold
     } else {
       Serial.print("At bottom");
       wh_actuator.hold();
@@ -141,6 +165,8 @@ void loop() {
 
     goingUp = false;
     atTop = false;
+
+    // If the above conditions were not met then set all motors to hold
   } else {
     Serial.println("hold");
     wh_motor.hold();
