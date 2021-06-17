@@ -4,20 +4,17 @@ enum State_enum {CALIBRATE, WAIT, MOVE, HOLD, ADJUST};
 enum Switch_enum {MIN, MAX};
 
 Actuator::Actuator() {}
-//TODO: Make lock do something special when at the top
-Actuator::Actuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor, Lock lock) {
+Actuator::Actuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor) {
   this->maxSwitch = maxSwitch;
   this->minSwitch = minSwitch;
   this->motor = actuatorMotor;
-  this->lock = lock;
   this->state = WAIT;
 }
 
-void Actuator::setActuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor, Lock lock) {
+void Actuator::setActuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor) {
   this->maxSwitch = maxSwitch;
   this->minSwitch = minSwitch;
   this->motor = actuatorMotor;
-  this->lock = lock;
   this->state = WAIT;
 }
 

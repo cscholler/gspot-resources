@@ -3,6 +3,8 @@
 #include "Lock.h"
 #include "Actuator.h"
 
+#include <arduino-timer.h>
+
 enum State_enum {CALIBRATE, WAIT, MOVE, HOLD, ADJUST};
 enum Switch_enum {MIN, MAX};
 
@@ -38,6 +40,8 @@ enum Switch_enum {MIN, MAX};
 #define NORMALLY_OPEN false
 
 // Create objects to be used later
+auto timer = timer_create_default();
+
 Motor wh_motor(H_IN1, H_IN2, WH_ENA);
 Motor dh_motor(H_IN1, H_IN2, DH_ENA);
 Motor wf_motor(F_IN1, F_IN2, WF_ENA);
@@ -55,32 +59,28 @@ Button wf_button_max(WF_TOP, NORMALLY_CLOSED);
 Button df_button_min(DF_BOTTOM, NORMALLY_CLOSED);
 Button df_button_max(DF_TOP, NORMALLY_CLOSED);
 
-Lock lock(upButton, dnButton);
+Actuator wh_actuator(wh_button_max, wh_button_min, wh_motor);
+Actuator dh_actuator(dh_button_max, dh_button_min, dh_motor);
+Actuator wf_actuator(wf_button_max, wf_button_min, wf_motor);
+Actuator df_actuator(df_button_max, df_button_min, df_motor);
 
-Actuator wh_actuator(wh_button_max, wh_button_min, wh_motor, lock);
-Actuator dh_actuator(dh_button_max, dh_button_min, dh_motor, lock);
-Actuator wf_actuator(wf_button_max, wf_button_min, wf_motor, lock);
-Actuator df_actuator(df_button_max, df_button_min, df_motor, lock);
-
-bool goingUp;
 bool atTop;
 bool atBottom;
 
 void setup() {
   Serial.begin(9600);
-  goingUp = false;
   atTop = false;
   atBottom = false;
 }
 
 void loop() {
-  lock.update();
+  timer.tick();
   //    wh_motor.moveAtSpeed(1);
   //    dh_motor.moveAtSpeed(1);
   //    wf_motor.moveAtSpeed(1);
   //    df_motor.moveAtSpeed(1);
-  // If only the 'up button' is pressed and the 'lock' is not engaged then begin actions to move upwards
-  if (upButton.isPressed() && !dnButton.isPressed() && !lock.isLocked()) {
+  // If only the 'up button' is pressed then begin actions to move upwards
+  if (upButton.isPressed() && !dnButton.isPressed()) {
     Serial.println("up");
     // If the bed is currently resting on the booth then run calibration before lifting
     if (atBottom) {
@@ -126,10 +126,8 @@ void loop() {
       atTop = false;
     }
 
-    goingUp = true;
-
     // If only the 'down button' is pressed and the 'lock' is not engaged then begin actions to move downwards
-  } else if (!upButton.isPressed() && dnButton.isPressed() && !lock.isLocked()) {
+  } else if (!upButton.isPressed() && dnButton.isPressed()) {
     Serial.println("down");
     // If the bed is not currently resting on the booth then move all corners down until it is
     if (!atBottom) {
@@ -144,14 +142,22 @@ void loop() {
       // If all lower limit switches are pressed then set 'atBottom' to true and drive all motors for 0.5 sec to release tention
       if (actuatorCounter >= 4 ) {
         Serial.print("Reached bottom");
-        atBottom = true;
 
         wh_motor.down();
         dh_motor.down();
         wf_motor.down();
         df_motor.down();
 
-        delay(500);
+        timer.every(1, [] {
+          Serial.println("Hi");
+          return NULL;
+        });
+
+        timer.in(500, [] {
+          atBottom = true;
+          Serial.println("--------------------------");
+          return NULL;
+        });
 
       }
       // If bed is resting on the booth then set all motors to hold
@@ -163,7 +169,6 @@ void loop() {
       df_actuator.hold();
     }
 
-    goingUp = false;
     atTop = false;
 
     // If the above conditions were not met then set all motors to hold
@@ -173,8 +178,6 @@ void loop() {
     dh_motor.hold();
     wf_motor.hold();
     df_motor.hold();
-
-    goingUp = false;
   }
-  delay(10);
+//  delay(10);
 }

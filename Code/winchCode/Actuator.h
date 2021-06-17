@@ -12,14 +12,13 @@ class Actuator {
     Button maxSwitch;
     Button minSwitch;
     Motor motor;
-    Lock lock;
     uint8_t state;
 
   public:
     Actuator();
-    Actuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor, Lock lock);
+    Actuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor);
 
-    void setActuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor, Lock lock);
+    void setActuator(Button maxSwitch, Button minSwitch, Motor actuatorMotor);
 
     uint8_t getState();
     void setState(uint8_t newState);
